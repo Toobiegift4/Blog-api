@@ -1,0 +1,23 @@
+name: Pylint
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.9"]
+    steps:
+    - name: Login to Docker Hub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKERHUB_USER }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    - name: Checkout
+      uses: actions/checkout@v2
+    - name: Test 
+      run: docker-compose run --rm app sh -c "python manage.py migrate && python manage.py test"
+    - name: Analysing the code with flake8
+      run: |
+        docker-compose exec -it app flake8 --per-file-ignores="expensetracker/settings.py:E501"
